@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Farmácia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 p-8">
+    <div class="max-w-6xl mx-auto">
+        <header class="flex justify-between items-center mb-10">
+            <h1 class="text-3xl font-bold text-slate-800">📦 Gestão de Pedidos</h1>
+            <div id="relogio" class="text-slate-400 font-mono"></div>
+        </header>
+
+        <div id="pedidos-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </div>
+
+    <script>
+        async function carregar() {
+            const res = await fetch('/api/pedidos');
+            const dados = await res.json();
+            const grid = document.getElementById('pedidos-grid');
+
+            grid.innerHTML = dados.map(p => `
+                <div class="bg-white rounded-2xl shadow-sm p-6 border border-slate-200">
+                    <div class="flex justify-between mb-4">
+                        <span class="text-2xl font-black text-blue-600">${p.senha}</span>
+                        <span class="px-3 py-1 rounded-full text-xs font-bold ${p.status === 'pendente' ? 'bg-amber-100 text-amber-600' : 'bg-green-100 text-green-600'} uppercase">
+                            ${p.status}
+                        </span>
+                    </div>
+                    <div class="mb-4 space-y-2">
+                        ${p.itens_pedido.map(i => `
+                            <div class="flex justify-between text-sm">
+                                <span class="text-slate-600">${i.produtos.nome}</span>
+                                <span class="font-bold">R$ ${i.preco_unitario}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="border-t pt-4 flex justify-between items-center">
+                        <span class="font-bold text-lg text-slate-800">Total: R$ ${p.total}</span>
+                        ${p.status === 'pendente' ? 
+                            `<button onclick="atualizar(${p.id}, 'pronto')" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold">PRONTO</button>` : 
+                            `<span class="text-green-500 font-bold">✓ Entregue</span>`}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function atualizar(id, status) {
+            await fetch(`/api/pedidos/${id}`, {
+                method: 'PATCH',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ status })
+            });
+            carregar();
+        }
+
+        setInterval(carregar, 5000);
+        carregar();
+    </script>
+</body>
+</html>
