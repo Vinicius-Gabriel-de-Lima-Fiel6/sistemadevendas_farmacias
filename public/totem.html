@@ -1,87 +1,41 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Totem Inteligente</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src='https://unpkg.com/tesseract.js@v2.1.0/dist/tesseract.min.js'></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Totem Farmácia</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
-<body class="bg-slate-900 h-screen flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl p-8 w-full max-w-lg shadow-2xl text-center">
-        <h1 class="text-4xl font-black text-blue-600 mb-2">FarmaTotem</h1>
-        <p class="text-slate-500 mb-8 font-medium">Autoatendimento Express</p>
-
-        <div id="step-1">
-            <label class="cursor-pointer block">
-                <div class="bg-blue-50 border-4 border-dashed border-blue-200 rounded-2xl p-12 hover:bg-blue-100 transition">
-                    <span class="text-6xl mb-4 block">📄</span>
-                    <span class="text-xl font-bold text-blue-700">ESCANEAR RECEITA</span>
-                    <input type="file" id="camera" accept="image/*" capture="environment" class="hidden">
-                </div>
-            </label>
+<body>
+    <div id="app" class="container">
+        <div id="step-1" class="screen active">
+            <h1>Bem-vindo à Smart Farma</h1>
+            <p>Toque abaixo para ler sua receita</p>
+            <input type="file" id="cameraInput" accept="image/*" capture="environment" hidden>
+            <button class="btn-large" onclick="document.getElementById('cameraInput').click()">📷 Escanear Receita</button>
         </div>
 
-        <div id="loading" class="hidden py-10">
-            <div class="animate-spin h-12 w-12 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
-            <p id="status-ocr" class="font-bold text-slate-700">Lendo caligrafia médica...</p>
+        <div id="step-2" class="screen hidden">
+            <div class="loader"></div>
+            <h2>Analisando com IA...</h2>
         </div>
 
-        <div id="step-2" class="hidden text-left">
-            <h2 class="font-bold text-slate-800 mb-4">Confirmar Produtos:</h2>
-            <div id="lista" class="space-y-2 mb-6 max-h-48 overflow-y-auto"></div>
-            <button onclick="confirmar()" class="w-full bg-green-500 text-white py-4 rounded-2xl font-black text-xl shadow-lg shadow-green-200">FINALIZAR PEDIDO</button>
+        <div id="step-3" class="screen hidden">
+            <h2>Itens Identificados</h2>
+            <ul id="med-list"></ul>
+            <button class="btn-confirm" onclick="confirmarPedido()">✅ Confirmar Pedido</button>
         </div>
 
-        <div id="step-3" class="hidden">
-            <div class="bg-blue-600 text-white rounded-2xl p-8">
-                <p class="uppercase text-sm opacity-80 mb-2">Sua Senha</p>
-                <h2 id="senha" class="text-7xl font-black mb-4">---</h2>
-                <p class="text-lg">Total: <span id="total">R$ 0,00</span></p>
+        <div id="step-4" class="screen hidden">
+            <h1>Pedido Confirmado!</h1>
+            <div class="senha-box">
+                <span id="senha-display">--</span>
             </div>
-            <button onclick="location.reload()" class="mt-6 text-slate-400 font-bold hover:text-blue-600">Fazer outro pedido</button>
+            <p>Dirija-se ao balcão.</p>
+            <button class="btn-small" onclick="location.reload()">Novo Atendimento</button>
         </div>
     </div>
 
-    <script>
-        let medsDetectados = [];
-        const cameraInput = document.getElementById('camera');
-
-        cameraInput.onchange = async (e) => {
-            const file = e.target.files[0];
-            if(!file) return;
-
-            document.getElementById('step-1').classList.add('hidden');
-            document.getElementById('loading').classList.remove('hidden');
-
-            const { data: { text } } = await Tesseract.recognize(file, 'por');
-            
-            // Filtro básico: linhas com mais de 5 caracteres
-            medsDetectados = text.split('\n').map(t => t.trim()).filter(t => t.length > 5);
-
-            const listaDiv = document.getElementById('lista');
-            listaDiv.innerHTML = medsDetectados.map(m => `
-                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex justify-between">
-                    <span class="font-medium text-slate-700">💊 ${m}</span>
-                </div>
-            `).join('');
-
-            document.getElementById('loading').classList.add('hidden');
-            document.getElementById('step-2').classList.remove('hidden');
-        };
-
-        async function confirmar() {
-            const res = await fetch('/api/pedidos', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ meds_extraidos: medsDetectados })
-            });
-            const data = await res.json();
-            
-            document.getElementById('senha').innerText = data.senha;
-            document.getElementById('total').innerText = `R$ ${data.total.toFixed(2)}`;
-            document.getElementById('step-2').classList.add('hidden');
-            document.getElementById('step-3').classList.remove('hidden');
-        }
-    </script>
+    <script type="module" src="js/totem.js"></script>
 </body>
 </html>
