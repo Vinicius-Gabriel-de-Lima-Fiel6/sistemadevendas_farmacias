@@ -1,24 +1,193 @@
-/* Layout Kanban */
-.kanban-container { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; padding: 20px; background: #f0f2f5; height: calc(100vh - 80px); }
-.column { background: #ebedf0; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; }
-.col-title { font-size: 1rem; color: #444; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
-.dot { width: 10px; height: 10px; border-radius: 50%; }
-.yellow { background: #ffc107; }
-.blue { background: #007bff; }
-.green { background: #28a745; }
+/* ===================================================
+   BASES E CORES (SYNAPSE LAB BRANDING)
+   =================================================== */
+:root {
+    --primary: #28a745;
+    --dark: #1a1a1a;
+    --bg: #f0f2f5;
+    --card-white: #ffffff;
+    --text-main: #333;
+    --yellow: #ffc107;
+    --blue: #007bff;
+    --red: #dc3545;
+}
 
-/* Cards */
-.pedido-card { background: white; border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: transform 0.2s; }
-.pedido-card:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-.pulse-border { border: 2px solid #ffc107; animation: pulse 1.5s infinite; }
-@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(255, 193, 7, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); } }
+body {
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg);
+    color: var(--text-main);
+    overflow-x: hidden;
+}
 
-/* Modal Side-by-Side */
-.modal { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); }
-.modal-content { background: white; margin: 2% auto; padding: 20px; width: 90%; max-width: 1200px; border-radius: 15px; height: 85vh; overflow-y: auto; }
-.side-by-side { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
-.receita-view img { width: 100%; border-radius: 10px; border: 1px solid #ddd; }
-.edit-item { display: flex; gap: 10px; margin-bottom: 10px; }
-.edit-item input { padding: 8px; border: 1px solid #ddd; border-radius: 5px; flex: 1; }
+/* ===================================================
+   HEADER OPERACIONAL
+   =================================================== */
+.admin-header {
+    background: var(--dark);
+    color: white;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
 
-.admin-header { background: #1a1a1a; color: white; padding: 10px 30px; display: flex; justify-content: space-between; align-items: center; }
+.logo-area { display: flex; align-items: center; gap: 10px; }
+.logo-area h1 { margin: 0; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 1px; }
+.logo-area h1 span { color: var(--primary); font-weight: 300; }
+
+.stats-bar { display: flex; gap: 20px; }
+.stat-item { text-align: center; background: rgba(255,255,255,0.1); padding: 5px 15px; border-radius: 8px; }
+.stat-item span { display: block; font-size: 1.2rem; font-weight: bold; color: var(--primary); }
+.stat-item small { font-size: 0.7rem; text-transform: uppercase; opacity: 0.8; }
+
+/* ===================================================
+   LAYOUT KANBAN (AS 3 COLUNAS)
+   =================================================== */
+.kanban-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    padding: 20px;
+    height: calc(100vh - 100px);
+    box-sizing: border-box;
+}
+
+.column {
+    background: #e2e4e9;
+    border-radius: 12px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    max-height: 100%;
+}
+
+.col-title {
+    font-size: 0.9rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #555;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.list {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+/* Estilo dos Cards de Pedido */
+.pedido-card {
+    background: var(--card-white);
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    border-left: 5px solid #ccc;
+    transition: all 0.2s ease;
+}
+
+.pedido-card:hover { transform: translateY(-3px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
+
+.status-novo { border-left-color: var(--yellow); }
+.status-preparando { border-left-color: var(--blue); }
+.status-pronto { border-left-color: var(--primary); }
+
+.card-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+.senha { font-weight: 900; font-size: 1.2rem; color: var(--dark); }
+.hora { font-size: 0.8rem; color: #888; }
+
+.card-actions button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 6px;
+    background: var(--primary);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* ===================================================
+   MODAL DE CONFERÊNCIA (O PULO DO GATO)
+   =================================================== */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0; top: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background: white;
+    margin: 2vh auto;
+    padding: 25px;
+    width: 95%;
+    max-width: 1300px;
+    border-radius: 15px;
+    height: 90vh;
+    position: relative;
+}
+
+.side-by-side {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    height: 90%;
+}
+
+.receita-view {
+    border: 2px solid #eee;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.receita-view img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.edit-view { padding: 10px; display: flex; flex-direction: column; }
+
+.edit-item {
+    display: grid;
+    grid-template-columns: 2fr 1fr 50px;
+    gap: 10px;
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.edit-item input {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.btn-confirm-final {
+    margin-top: auto;
+    padding: 20px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close { position: absolute; right: 20px; top: 10px; font-size: 30px; cursor: pointer; color: #888; }
