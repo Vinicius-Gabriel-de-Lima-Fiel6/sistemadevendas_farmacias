@@ -9,63 +9,63 @@ async function init() {
 
     atualizarPainel();
 
-    // Escuta mudanças em tempo real
-    supabase.channel('pedidos-realtime')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos_totem' }, (payload) => {
-            if (payload.eventType === 'INSERT') document.getElementById('alert-sound').play();
+    // Realtime: Atualiza quando algo muda no banco
+    supabase.channel('pedidos-all')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, (payload) => {
+            if (payload.eventType === 'INSERT') {
+                const audio = document.getElementById('alert-sound');
+                if(audio) audio.play();
+            }
             atualizarPainel();
         })
         .subscribe();
 }
 
 async function atualizarPainel() {
-    // Pega o org_id da URL (vindo do SynapseLab)
-    const params = new URLSearchParams(window.location.search);
-    const orgId = params.get('org');
+    const { data, error } = await supabase
+        .from('pedidos')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-    let query = supabase.from('pedidos_totem').select('*');
-    if (orgId) query = query.eq('org_id', orgId);
-
-    const { data } = await query.order('created_at', { ascending: false });
+    if (error) return console.error(error);
     pedidosLocais = data;
 
     renderizarColunas();
-    atualizarContadores();
+    document.getElementById('count-total').innerText = data.length;
 }
 
 function renderizarColunas() {
-    const colunas = {
+    const listas = {
         'novo': document.getElementById('list-novo'),
         'preparando': document.getElementById('list-preparando'),
         'pronto': document.getElementById('list-pronto')
     };
 
-    // Limpa colunas
-    Object.values(colunas).forEach(c => c.innerHTML = '');
+    Object.values(listas).forEach(l => l.innerHTML = '');
 
     pedidosLocais.forEach(p => {
-        const card = document.createElement('div');
-        card.className = `pedido-card ${p.status === 'novo' ? 'pulse-border' : ''}`;
-        card.innerHTML = `
+        const div = document.createElement('div');
+        div.className = `pedido-card status-${p.status}`;
+        div.innerHTML = `
             <div class="card-header">
-                <span class="senha">#${p.senha_curta}</span>
+                <span class="senha">${p.senha_curta}</span>
                 <span class="hora">${new Date(p.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
             </div>
             <div class="card-body">
-                <p>${p.itens.length} medicamento(s) detectado(s)</p>
+                <strong>${p.itens ? p.itens.length : 0} Itens</strong>
             </div>
             <div class="card-actions">
-                ${p.status === 'novo' ? `<button onclick="window.iniciarPreparo('${p.id}')">Iniciar</button>` : ''}
-                ${p.status === 'preparando' ? `<button onclick="window.abrirConferencia('${p.id}')">Conferir & Entregar</button>` : ''}
+                ${p.status === 'novo' ? `<button class="btn-action" onclick="window.mudarStatus('${p.id}', 'preparando')">Atender</button>` : ''}
+                ${p.status === 'preparando' ? `<button class="btn-action btn-blue" onclick="window.abrirConferencia('${p.id}')">Conferir</button>` : ''}
+                ${p.status === 'pronto' ? `<small style="color: green">Aguardando Cliente</small>` : ''}
             </div>
         `;
-        colunas[p.status].appendChild(card);
+        listas[p.status].appendChild(div);
     });
 }
 
-// Funções Globais para os Botões
-window.iniciarPreparo = async (id) => {
-    await supabase.from('pedidos_totem').update({ status: 'preparando' }).eq('id', id);
+window.mudarStatus = async (id, novoStatus) => {
+    await supabase.from('pedidos').update({ status: novoStatus }).eq('id', id);
     atualizarPainel();
 };
 
@@ -76,25 +76,17 @@ window.abrirConferencia = (id) => {
     const editor = document.getElementById('itens-editor');
     editor.innerHTML = p.itens.map(i => `
         <div class="edit-item">
-            <input type="text" value="${i.nome}">
-            <input type="text" value="${i.dosagem}" style="width: 80px">
+            <span>${i.nome}</span>
+            <span><strong>${i.dosagem}</strong></span>
         </div>
     `).join('');
 
     document.getElementById('modal-conferencia').style.display = 'block';
-    document.getElementById('btn-finalizar-preparo').onclick = () => window.finalizarPedido(id);
+    document.getElementById('btn-finalizar-preparo').onclick = () => {
+        window.mudarStatus(id, 'pronto');
+        window.fecharModal();
+    };
 };
-
-window.finalizarPedido = async (id) => {
-    await supabase.from('pedidos_totem').update({ status: 'pronto' }).eq('id', id);
-    document.getElementById('modal-conferencia').style.display = 'none';
-    atualizarPainel();
-};
-
-function atualizarContadores() {
-    document.getElementById('count-novo').innerText = pedidosLocais.filter(p => p.status === 'novo').length;
-    document.getElementById('count-preparando').innerText = pedidosLocais.filter(p => p.status === 'preparando').length;
-}
 
 window.fecharModal = () => document.getElementById('modal-conferencia').style.display = 'none';
 
