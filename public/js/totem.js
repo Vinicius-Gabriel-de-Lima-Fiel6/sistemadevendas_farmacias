@@ -1,97 +1,62 @@
-import { supabase } from './supabase.js';
+import { supabase } from './config.js';
 
-const fileInput = document.getElementById('fileInput');
-const listaEl = document.getElementById('lista-medicamentos');
-let itensAtuais = [];
-let imagemBase64 = null;
-let imagemFile = null;
+const cam = document.getElementById('cam');
+let currentMeds = [];
+let currentImg = null;
 
-// 1. Captura e Preview
-window.triggerCamera = () => fileInput.click();
-
-fileInput.addEventListener('change', async (e) => {
+cam.onchange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    imagemFile = file;
+    currentImg = file;
+    showScreen(2);
 
-    mostrarTela('tela-loading');
-
-    // Converter Base64 para IA
     const reader = new FileReader();
     reader.readAsDataURL(file);
-    reader.onload = () => {
-        imagemBase64 = reader.result.split(',')[1];
-        analisarReceita();
+    reader.onload = async () => {
+        const base64 = reader.result.split(',')[1];
+        try {
+            const res = await fetch('/api/analyze', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ image: base64 })
+            });
+            const data = await res.json();
+            currentMeds = data.medicamentos;
+            renderList();
+            showScreen(3);
+        } catch (err) { alert('Erro na IA'); showScreen(1); }
     };
-});
+};
 
-// 2. Enviar para API Python
-async function analisarReceita() {
-    try {
-        const req = await fetch('/api/analyze', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ image: imagemBase64 })
-        });
-        
-        const res = await req.json();
-        itensAtuais = res.medicamentos || [];
-        
-        renderizarLista();
-        mostrarTela('tela-resultado');
-    } catch (err) {
-        alert('Erro ao analisar receita. Tente novamente.');
-        mostrarTela('tela-inicial');
-    }
-}
-
-// 3. Renderizar Itens
-function renderizarLista() {
-    listaEl.innerHTML = itensAtuais.map((item, index) => `
-        <div class="item-med">
-            <div>
-                <strong>${item.nome}</strong>
-                <small>${item.dosagem} (x${item.qtd})</small>
-            </div>
-            <button class="btn-remove" onclick="window.removerItem(${index})">✕</button>
+function renderList() {
+    const list = document.getElementById('med-list');
+    list.innerHTML = currentMeds.map((m, i) => `
+        <div class="item-card">
+            <span><strong>${m.nome}</strong> - ${m.dosagem}</span>
+            <button onclick="window.removeMed(${i})" style="color:red; border:none; background:none; cursor:pointer">Remover</button>
         </div>
     `).join('');
 }
 
-window.removerItem = (index) => {
-    itensAtuais.splice(index, 1);
-    renderizarLista();
-};
+window.removeMed = (i) => { currentMeds.splice(i, 1); renderList(); };
 
-// 4. Confirmar e Salvar no Supabase
-window.confirmarPedido = async () => {
-    if (itensAtuais.length === 0) return alert('A lista está vazia!');
+document.getElementById('btn-save').onclick = async () => {
+    const senha = 'A-' + Math.floor(100 + Math.random() * 900);
+    const imgName = `rec-${Date.now()}.jpg`;
     
-    // Upload da Imagem
-    const nomeImg = `rec_${Date.now()}.jpg`;
-    await supabase.storage.from('receitas').upload(nomeImg, imagemFile);
-    
-    const { data: { publicUrl } } = supabase.storage.from('receitas').getPublicUrl(nomeImg);
+    await supabase.storage.from('receitas').upload(imgName, currentImg);
+    const { data: { publicUrl } } = supabase.storage.from('receitas').getPublicUrl(imgName);
 
-    // Salvar Pedido
-    const senha = `A-${Math.floor(Math.random() * 900) + 100}`;
-    
-    const { error } = await supabase.from('pedidos').insert({
+    await supabase.from('pedidos').insert({
         senha_curta: senha,
-        status: 'novo',
-        receita_url: publicUrl,
-        itens: itensAtuais
+        itens: currentMeds,
+        receita_url: publicUrl
     });
 
-    if (!error) {
-        document.getElementById('senha-final').innerText = senha;
-        mostrarTela('tela-sucesso');
-    }
+    document.getElementById('senha-val').innerText = senha;
+    showScreen(4);
 };
 
-window.novoAtendimento = () => location.reload();
-
-function mostrarTela(id) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
+function showScreen(n) {
+    document.querySelectorAll('.screen').forEach((s, i) => s.classList.toggle('active', i === n-1));
 }
