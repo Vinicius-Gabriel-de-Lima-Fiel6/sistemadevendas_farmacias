@@ -1,6 +1,25 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-const supabaseUrl = 'SUA_URL_DO_SUPABASE';
-const supabaseKey = 'SUA_CHAVE_ANON_DO_SUPABASE';
+let supabaseInstance = null;
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+export async function getSupabase() {
+    if (supabaseInstance) return supabaseInstance;
+
+    try {
+        // Busca as variáveis que estão no servidor Python
+        const response = await fetch('/api/config');
+        const config = await response.json();
+
+        if (!config.supabaseUrl || !config.supabaseKey) {
+            console.error('Erro: Chaves não encontradas na API');
+            return null;
+        }
+
+        // Cria o cliente
+        supabaseInstance = createClient(config.supabaseUrl, config.supabaseKey);
+        return supabaseInstance;
+    } catch (error) {
+        console.error('Erro ao carregar configurações:', error);
+        return null;
+    }
+}
