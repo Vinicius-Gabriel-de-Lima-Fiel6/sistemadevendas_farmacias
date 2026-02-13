@@ -3,36 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Totem Inteligente - Farmácia</title>
+    <title>Totem Farmácia</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <div id="app">
-        <section id="step-1" class="active">
-            <h1>🏥 Smart Farma</h1>
-            <p>Toque no botão abaixo para escanear sua receita.</p>
-            <button class="btn-main" onclick="document.getElementById('cam').click()">📷 ESCANEAR RECEITA</button>
-            <input type="file" id="cam" accept="image/*" capture="environment" hidden>
-        </section>
-
-        <section id="step-2">
-            <div class="loader"></div>
-            <h2>IA Analisando sua Receita...</h2>
-        </section>
-
-        <section id="step-3">
-            <h2>Medicamentos Detectados</h2>
-            <div id="lista-meds"></div>
-            <button class="btn-confirm" id="btn-finalizar">CONFIRMAR PEDIDO</button>
-        </section>
-
-        <section id="step-4">
-            <h1 style="color: green;">✓ Pedido Enviado</h1>
-            <p>Sua senha para retirada é:</p>
-            <div class="senha-box" id="senha-val">--</div>
-            <button onclick="location.reload()">Novo Atendimento</button>
-        </section>
+    <div id="step-1" class="screen active">
+        <h1>🏥 Smart Farma</h1>
+        <p>Bem-vindo! Toque abaixo para começar.</p>
+        <button class="btn-main" onclick="document.getElementById('cam').click()">ESCANEAR RECEITA</button>
+        <input type="file" id="cam" accept="image/*" capture="environment" hidden>
     </div>
+
+    <div id="step-2" class="screen">
+        <div class="loader"></div>
+        <h2>Processando Receita...</h2>
+    </div>
+
+    <div id="step-3" class="screen">
+        <h2>Confirmar Medicamentos</h2>
+        <div id="med-list" style="width: 100%;"></div>
+        <button class="btn-confirm" id="btn-save">FINALIZAR PEDIDO</button>
+    </div>
+
+    <div id="step-4" class="screen">
+        <h1 style="color: var(--success)">PEDIDO ENVIADO!</h1>
+        <p>Sua senha é:</p>
+        <div id="senha-val" class="senha-box">--</div>
+        <button class="btn-main" onclick="location.reload()" style="font-size: 1rem;">Novo Atendimento</button>
+    </div>
+
     <script type="module" src="js/totem.js"></script>
 </body>
 </html>
