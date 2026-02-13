@@ -2,36 +2,37 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>SynapseLab | Central de Pedidos</title>
-    <link rel="stylesheet" href="css/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SynapseLab | Central de Vendas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
 </head>
-<body class="admin-body">
+<body>
     <header class="admin-header">
         <div class="logo-area">
-            <span class="material-icons">local_pharmacy</span>
+            <span class="material-icons" style="color: #28a745; font-size: 30px;">bolt</span>
             <h1>SynapseLab <span>Operacional</span></h1>
         </div>
         <div class="stats-bar">
-            <div class="stat-item"><span id="count-novo">0</span><small>Novos</small></div>
-            <div class="stat-item"><span id="count-preparando">0</span><small>Preparando</small></div>
-            <div id="online-tag">● Realtime Ativo</div>
+            <div class="stat-item"><span id="count-total">0</span><small>Hoje</small></div>
+            <div id="online-tag">● Sistema Online</div>
         </div>
     </header>
 
     <main class="kanban-container">
-        <section class="column" id="col-novo">
+        <section class="column">
             <h2 class="col-title"><span class="dot yellow"></span> Recebidos</h2>
             <div class="list" id="list-novo"></div>
         </section>
 
-        <section class="column" id="col-preparando">
-            <h2 class="col-title"><span class="dot blue"></span> Em Preparação</h2>
+        <section class="column">
+            <h2 class="col-title"><span class="dot blue"></span> Preparando</h2>
             <div class="list" id="list-preparando"></div>
         </section>
 
-        <section class="column" id="col-pronto">
-            <h2 class="col-title"><span class="dot green"></span> Prontos para Retirada</h2>
+        <section class="column">
+            <h2 class="col-title"><span class="dot green"></span> Prontos</h2>
             <div class="list" id="list-pronto"></div>
         </section>
     </main>
@@ -45,9 +46,9 @@
                     <img id="img-receita-modal" src="" alt="Receita">
                 </div>
                 <div class="edit-view">
-                    <h3>Confirmar Itens</h3>
+                    <h3>Conferir Itens</h3>
                     <div id="itens-editor"></div>
-                    <button class="btn-confirm-final" id="btn-finalizar-preparo">Mudar para: Pronto</button>
+                    <button class="btn-confirm-final" id="btn-finalizar-preparo">Finalizar e Notificar</button>
                 </div>
             </div>
         </div>
