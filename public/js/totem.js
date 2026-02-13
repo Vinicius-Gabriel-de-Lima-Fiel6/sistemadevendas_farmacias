@@ -1,8 +1,16 @@
-import { supabase } from './config.js';
+import { getSupabase } from './config.js';
 
+// Inicialização Global
+let supabase = null;
 const cam = document.getElementById('cam');
 let currentMeds = [];
 let currentImg = null;
+
+// Função auto-executável para iniciar o Supabase
+(async function init() {
+    supabase = await getSupabase();
+    if (!supabase) alert("Erro crítico: Falha ao conectar no banco de dados.");
+})();
 
 cam.onchange = async (e) => {
     const file = e.target.files[0];
@@ -21,10 +29,14 @@ cam.onchange = async (e) => {
                 body: JSON.stringify({ image: base64 })
             });
             const data = await res.json();
-            currentMeds = data.medicamentos;
+            currentMeds = data.medicamentos || [];
             renderList();
             showScreen(3);
-        } catch (err) { alert('Erro na IA'); showScreen(1); }
+        } catch (err) { 
+            console.error(err);
+            alert('Erro na IA'); 
+            showScreen(1); 
+        }
     };
 };
 
@@ -41,20 +53,32 @@ function renderList() {
 window.removeMed = (i) => { currentMeds.splice(i, 1); renderList(); };
 
 document.getElementById('btn-save').onclick = async () => {
+    if (!supabase) return alert("Sistema offline (sem conexão DB)");
+
     const senha = 'A-' + Math.floor(100 + Math.random() * 900);
     const imgName = `rec-${Date.now()}.jpg`;
     
-    await supabase.storage.from('receitas').upload(imgName, currentImg);
+    // Upload Imagem
+    const { error: uploadError } = await supabase.storage.from('receitas').upload(imgName, currentImg);
+    if(uploadError) console.error("Erro upload:", uploadError);
+
     const { data: { publicUrl } } = supabase.storage.from('receitas').getPublicUrl(imgName);
 
-    await supabase.from('pedidos').insert({
+    // Salvar Pedido
+    const { error: dbError } = await supabase.from('pedidos').insert({
         senha_curta: senha,
         itens: currentMeds,
-        receita_url: publicUrl
+        receita_url: publicUrl,
+        status: 'novo'
     });
 
-    document.getElementById('senha-val').innerText = senha;
-    showScreen(4);
+    if (dbError) {
+        alert("Erro ao salvar pedido");
+        console.error(dbError);
+    } else {
+        document.getElementById('senha-val').innerText = senha;
+        showScreen(4);
+    }
 };
 
 function showScreen(n) {
