@@ -2,15 +2,59 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Painel Admin - Farmácia</title>
+    <title>SynapseLab | Central de Pedidos</title>
     <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
-<body>
-    <header style="padding: 20px; background: white; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between;">
-        <h2>Gestão de Pedidos</h2>
-        <div id="online-tag" style="color: green;">● Sistema Realtime Ativo</div>
+<body class="admin-body">
+    <header class="admin-header">
+        <div class="logo-area">
+            <span class="material-icons">local_pharmacy</span>
+            <h1>SynapseLab <span>Operacional</span></h1>
+        </div>
+        <div class="stats-bar">
+            <div class="stat-item"><span id="count-novo">0</span><small>Novos</small></div>
+            <div class="stat-item"><span id="count-preparando">0</span><small>Preparando</small></div>
+            <div id="online-tag">● Realtime Ativo</div>
+        </div>
     </header>
-    <div id="grid-pedidos" class="grid"></div>
+
+    <main class="kanban-container">
+        <section class="column" id="col-novo">
+            <h2 class="col-title"><span class="dot yellow"></span> Recebidos</h2>
+            <div class="list" id="list-novo"></div>
+        </section>
+
+        <section class="column" id="col-preparando">
+            <h2 class="col-title"><span class="dot blue"></span> Em Preparação</h2>
+            <div class="list" id="list-preparando"></div>
+        </section>
+
+        <section class="column" id="col-pronto">
+            <h2 class="col-title"><span class="dot green"></span> Prontos para Retirada</h2>
+            <div class="list" id="list-pronto"></div>
+        </section>
+    </main>
+
+    <div id="modal-conferencia" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="fecharModal()">&times;</span>
+            <div class="side-by-side">
+                <div class="receita-view">
+                    <h3>Receita Original</h3>
+                    <img id="img-receita-modal" src="" alt="Receita">
+                </div>
+                <div class="edit-view">
+                    <h3>Confirmar Itens</h3>
+                    <div id="itens-editor"></div>
+                    <button class="btn-confirm-final" id="btn-finalizar-preparo">Mudar para: Pronto</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <audio id="alert-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
+
     <script type="module" src="js/painel.js"></script>
 </body>
 </html>
