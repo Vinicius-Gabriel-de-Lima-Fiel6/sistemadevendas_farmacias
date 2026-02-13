@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Totem Inteligente - Farmácia</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="app">
+        <section id="step-1" class="active">
+            <h1>🏥 Smart Farma</h1>
+            <p>Toque no botão abaixo para escanear sua receita.</p>
+            <button class="btn-main" onclick="document.getElementById('cam').click()">📷 ESCANEAR RECEITA</button>
+            <input type="file" id="cam" accept="image/*" capture="environment" hidden>
+        </section>
+
+        <section id="step-2">
+            <div class="loader"></div>
+            <h2>IA Analisando sua Receita...</h2>
+        </section>
+
+        <section id="step-3">
+            <h2>Medicamentos Detectados</h2>
+            <div id="lista-meds"></div>
+            <button class="btn-confirm" id="btn-finalizar">CONFIRMAR PEDIDO</button>
+        </section>
+
+        <section id="step-4">
+            <h1 style="color: green;">✓ Pedido Enviado</h1>
+            <p>Sua senha para retirada é:</p>
+            <div class="senha-box" id="senha-val">--</div>
+            <button onclick="location.reload()">Novo Atendimento</button>
+        </section>
+    </div>
+    <script type="module" src="js/totem.js"></script>
+</body>
+</html>
