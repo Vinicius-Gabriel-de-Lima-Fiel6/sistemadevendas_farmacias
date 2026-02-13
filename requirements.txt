@@ -1,5 +1,4 @@
-fastapi
-uvicorn
-pydantic
-supabase
-python-multipart
+flask
+google-generativeai
+python-dotenv
+werkzeug
