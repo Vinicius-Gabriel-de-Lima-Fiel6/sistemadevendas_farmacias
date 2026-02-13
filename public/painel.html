@@ -1,22 +1,16 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Painel Farmacêutico</title>
+    <title>Painel Admin - Farmácia</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body class="painel-body">
-    <header class="painel-header">
-        <div class="logo">🏥 SmartFarma Admin</div>
-        <div class="status-badge">● Sistema Online</div>
+<body>
+    <header style="padding: 20px; background: white; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between;">
+        <h2>Gestão de Pedidos</h2>
+        <div id="online-tag" style="color: green;">● Sistema Realtime Ativo</div>
     </header>
-    
-    <main>
-        <h2>Fila de Pedidos</h2>
-        <div id="grid-pedidos" class="grid-pedidos">
-            </div>
-    </main>
-
+    <div id="grid-pedidos" class="grid"></div>
     <script type="module" src="js/painel.js"></script>
 </body>
 </html>
