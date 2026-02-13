@@ -1,0 +1,7 @@
+body { font-family: sans-serif; background: #f0f2f5; margin: 0; text-align: center; }
+section { display: none; padding: 40px; height: 100vh; flex-direction: column; align-items: center; justify-content: center; }
+section.active { display: flex; }
+.btn-main { background: #007bff; color: white; border: none; padding: 30px 60px; font-size: 24px; border-radius: 15px; cursor: pointer; }
+.senha-box { font-size: 80px; font-weight: bold; padding: 20px; border: 5px solid #007bff; margin: 20px; border-radius: 20px; color: #007bff; }
+.loader { border: 8px solid #f3f3f3; border-top: 8px solid #3498db; border-radius: 50%; width: 60px; height: 60px; animation: spin 2s linear infinite; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
